@@ -1,9 +1,15 @@
 package io.shanoon.fleetmanagementsystem.service.Interface;
 
-import io.shanoon.fleetmanagementsystem.model.Vehicle;
-import io.shanoon.fleetmanagementsystem.model.dto.VehicleUpdateDto;
-import jdk.jshell.spi.ExecutionControl;
+import io.shanoon.fleetmanagementsystem.model.dto.VehicleStatusUpdate;
+
+import java.util.List;
+import java.util.UUID;
 
 public interface IVehicleService {
-    public VehicleUpdateDto createVehicleUpdate(Vehicle vehicle) throws ExecutionControl.NotImplementedException;
+    void publishStatus(VehicleStatusUpdate update);
+    void updateCurrentStatus(VehicleStatusUpdate update);
+    void processStatusUpdate(String vehicleId, VehicleStatusUpdate update);
+    VehicleStatusUpdate getCurrentStatus(UUID vehicleId);
+
+    List<VehicleStatusUpdate> getVehicleUpdate();
 }

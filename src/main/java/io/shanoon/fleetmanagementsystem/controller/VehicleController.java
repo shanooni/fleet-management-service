@@ -1,31 +1,35 @@
 package io.shanoon.fleetmanagementsystem.controller;
 
-import io.shanoon.fleetmanagementsystem.message.sender.VehiclePublisher;
-import io.shanoon.fleetmanagementsystem.model.Vehicle;
-import io.shanoon.fleetmanagementsystem.model.dto.VehicleUpdateDto;
+import io.shanoon.fleetmanagementsystem.message.sender.VehicleStatusPublisher;
+import io.shanoon.fleetmanagementsystem.model.dto.VehicleStatusUpdate;
 import io.shanoon.fleetmanagementsystem.service.VehicleService;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
+@RequestMapping("/api/v1/vehicles")
 public class VehicleController {
-    @Autowired
-    private VehicleService vehicleService;
 
-    @Autowired
-    private VehiclePublisher vehiclePublisher;
+    private final VehicleService vehicleService;
 
-    @GetMapping("/api/publish/vehicle")
-    public String publish(@RequestParam String message){
-        vehiclePublisher.publishMessage("vehicle-update", message);
-        return "Message sent";
+    public VehicleController(VehicleService vehicleService){
+        this.vehicleService = vehicleService;
     }
 
-    @PostMapping("/api/vehicles")
-    public ResponseEntity<VehicleUpdateDto> createVehicleUpdate(@RequestBody Vehicle vehicle){
-        var vehicleUpdate = vehicleService.createVehicleUpdate(vehicle);
-        return new ResponseEntity<>(vehicleUpdate,HttpStatus.CREATED);
+//    @GetMapping
+//    public String publish(@RequestParam String message){
+//        vehiclePublisher.publishMessage("vehicle-update", message);
+//        return "Message sent";
+//    }
+
+    @PostMapping("/{vehicleId}/status")
+    public ResponseEntity<Void> updateStatus( @PathVariable String vehicleId,
+                                              @Valid @RequestBody VehicleStatusUpdate update)
+    {
+        vehicleService.publishStatus(update);
+        vehicleService.processStatusUpdate(vehicleId,update);
+        return ResponseEntity.accepted().build();
     }
 }
