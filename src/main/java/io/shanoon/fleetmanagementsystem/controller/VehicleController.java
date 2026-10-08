@@ -18,18 +18,11 @@ public class VehicleController {
         this.vehicleService = vehicleService;
     }
 
-//    @GetMapping
-//    public String publish(@RequestParam String message){
-//        vehiclePublisher.publishMessage("vehicle-update", message);
-//        return "Message sent";
-//    }
-
     @PostMapping("/{vehicleId}/status")
     public ResponseEntity<Void> updateStatus( @PathVariable String vehicleId,
                                               @Valid @RequestBody VehicleStatusUpdate update)
     {
         vehicleService.publishStatus(update);
-        vehicleService.processStatusUpdate(vehicleId,update);
         return ResponseEntity.accepted().build();
     }
 }

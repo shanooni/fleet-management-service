@@ -4,6 +4,7 @@ import io.shanoon.fleetmanagementsystem.message.consumer.VehicleCurrentStatusSub
 import io.shanoon.fleetmanagementsystem.message.sender.VehicleStatusPublisher;
 import io.shanoon.fleetmanagementsystem.model.VehicleStatus;
 import io.shanoon.fleetmanagementsystem.model.dto.VehicleStatusUpdate;
+import io.shanoon.fleetmanagementsystem.repository.IVehicleRepository;
 import io.shanoon.fleetmanagementsystem.service.Interface.IVehicleService;
 import org.springframework.stereotype.Service;
 
@@ -12,12 +13,12 @@ import java.util.UUID;
 
 @Service
 public class VehicleService implements IVehicleService {
+
     private final VehicleStatusPublisher publisher;
-    private final VehicleCurrentStatusSubscriber statusSubscriber;
-    public VehicleService(VehicleStatusPublisher vehicleStatusPublisher,
-                          VehicleCurrentStatusSubscriber vehicleCurrentStatusSubscriber){
+    private final IVehicleRepository repository;
+    public VehicleService(VehicleStatusPublisher vehicleStatusPublisher, IVehicleRepository repository){
         this.publisher = vehicleStatusPublisher;
-        this.statusSubscriber = vehicleCurrentStatusSubscriber;
+        this.repository = repository;
     }
 
     @Override
@@ -31,17 +32,16 @@ public class VehicleService implements IVehicleService {
     }
 
     @Override
-    public void processStatusUpdate(String vehicleId, VehicleStatusUpdate update) {
-        var vehicleStatus = new VehicleStatus(
-                vehicleId,
-                update.latitude(),
-                update.longitude(),
-                update.batteryPercentage(),
-                update.speed(),
-                update.timestamp()
-        );
-        System.out.println("received status update for vehicle: " + vehicleId);
+    public void processStatusUpdate(VehicleStatusUpdate update) {
+        var vehicleStatus = new VehicleStatus();
+        vehicleStatus.setBatteryPercentage(update.batteryPercentage());
+        vehicleStatus.setLatitude(update.latitude());
+        vehicleStatus.setLongitude(update.longitude());
+        vehicleStatus.setSpeed(update.speed());
+        vehicleStatus.setTimestamp(update.timestamp());
+        repository.save(vehicleStatus);
     }
+
 
     @Override
     public VehicleStatusUpdate getCurrentStatus(UUID vehicleId) {

@@ -1,39 +1,38 @@
 package io.shanoon.fleetmanagementsystem.config;
 
 import io.shanoon.fleetmanagementsystem.message.consumer.VehicleCurrentStatusSubscriber;
-import io.shanoon.fleetmanagementsystem.message.consumer.VehicleHistoricalDataSubscriber;
-import io.shanoon.fleetmanagementsystem.model.VehicleStatus;
 import io.shanoon.fleetmanagementsystem.model.dto.VehicleStatusUpdate;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.listener.ChannelTopic;
 import org.springframework.data.redis.listener.RedisMessageListenerContainer;
 import org.springframework.data.redis.listener.adapter.MessageListenerAdapter;
 import org.springframework.data.redis.serializer.JacksonJsonRedisSerializer;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
 
-import java.util.List;
-
 @Configuration
-public class VehiclePublisherConfig {
+public class RedisConfig {
 
     @Bean
-    public RedisMessageListenerContainer redisMessageListenerContainer(RedisConnectionFactory redisConnectionFactory)
+    public RedisMessageListenerContainer redisMessageListenerContainer(RedisConnectionFactory redisConnectionFactory,
+                                                                       VehicleCurrentStatusSubscriber subscriber,
+                                                                       ChannelTopic channelTopic)
     {
         var container = new RedisMessageListenerContainer();
         container.setConnectionFactory(redisConnectionFactory);
+
+        container.addMessageListener(
+                subscriber,
+                channelTopic
+        );
         return container;
     }
 
     @Bean
     public MessageListenerAdapter vehicleCurrentStatusUpdateListenerAdapter(VehicleCurrentStatusSubscriber vehicleCurrentStatusSubscriber){
         return new MessageListenerAdapter(vehicleCurrentStatusSubscriber, "vehicleStatusUpdate");
-    }
-
-    @Bean
-    VehicleCurrentStatusSubscriber vehicleCurrentStatusSubscriber(){
-        return new VehicleCurrentStatusSubscriber();
     }
 
     @Bean
@@ -50,5 +49,15 @@ public class VehiclePublisherConfig {
         template.setHashValueSerializer(jsonRedisSerializer);
 
         return template;
+    }
+
+    @Bean
+    public ChannelTopic vehicleStatusTopic(){
+        return new ChannelTopic("vehicle-status");
+    }
+
+    @Bean
+    public JacksonJsonRedisSerializer<VehicleStatusUpdate> vehicleStatusUpdateJacksonJsonRedisSerializer(){
+        return new JacksonJsonRedisSerializer<>(VehicleStatusUpdate.class);
     }
 }

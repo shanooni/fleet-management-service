@@ -3,19 +3,19 @@ package io.shanoon.fleetmanagementsystem.model;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.*;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-
 import java.time.Instant;
+
 @AllArgsConstructor
 @NoArgsConstructor
 @Data
+@Builder
 
 @Entity
 @Table(name = "VehicleStatus")
 public class VehicleStatus {
-
-    @NotNull
     private @Id @GeneratedValue(strategy = GenerationType.AUTO) String vehicleId;
     @NotNull
     @NotBlank

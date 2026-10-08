@@ -2,24 +2,32 @@ package io.shanoon.fleetmanagementsystem.message.consumer;
 
 import io.shanoon.fleetmanagementsystem.model.dto.VehicleStatusUpdate;
 import io.shanoon.fleetmanagementsystem.service.Interface.IVehicleService;
-import io.shanoon.fleetmanagementsystem.service.VehicleService;
+import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.data.redis.annotation.RedisListener;
+import org.springframework.data.redis.connection.Message;
+import org.springframework.data.redis.connection.MessageListener;
+import org.springframework.data.redis.serializer.JacksonJsonRedisSerializer;
 import org.springframework.stereotype.Component;
 
-import java.util.List;
 
 @Component
-public class VehicleCurrentStatusSubscriber {
-    private static final Logger log =  LoggerFactory.getLogger(VehicleCurrentStatusSubscriber.class);
-    private IVehicleService vehicleService;
+public class VehicleCurrentStatusSubscriber implements MessageListener {
 
-    public void vehicleStatusUpdate(VehicleStatusUpdate update){
-        vehicleService.processStatusUpdate("VH-1001",update);
+    private static final Logger log =  LoggerFactory.getLogger(VehicleCurrentStatusSubscriber.class);
+
+    private final JacksonJsonRedisSerializer<VehicleStatusUpdate> serializer;
+    private final IVehicleService vehicleService;
+
+    public VehicleCurrentStatusSubscriber(JacksonJsonRedisSerializer<VehicleStatusUpdate> vehicleStatusUpdateJacksonJsonRedisSerializer,
+                                          IVehicleService vehicleService){
+        this.serializer = vehicleStatusUpdateJacksonJsonRedisSerializer;
+        this.vehicleService = vehicleService;
     }
 
-//    public List<VehicleStatusUpdate> getVehicleStatusUpdate(){
-//        return vehicleService.getVehicleUpdate();
-//    }
+    @Override
+    public void onMessage(Message message, byte @Nullable [] pattern) {
+        var update = serializer.deserialize(message.getBody());
+        vehicleService.processStatusUpdate(update);
+    }
 }

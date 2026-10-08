@@ -8,7 +8,7 @@ import java.util.UUID;
 public interface IVehicleService {
     void publishStatus(VehicleStatusUpdate update);
     void updateCurrentStatus(VehicleStatusUpdate update);
-    void processStatusUpdate(String vehicleId, VehicleStatusUpdate update);
+    void processStatusUpdate(VehicleStatusUpdate update);
     VehicleStatusUpdate getCurrentStatus(UUID vehicleId);
 
     List<VehicleStatusUpdate> getVehicleUpdate();
