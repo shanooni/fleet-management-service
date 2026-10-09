@@ -3,9 +3,9 @@ package io.shanoon.fleetmanagementsystem.model.dto;
 import jakarta.validation.constraints.*;
 
 import java.time.Instant;
-import java.util.UUID;
 
 public record VehicleStatusUpdate(
+        String vehicleId,
         @NotNull
         @DecimalMax("90.0")
         @DecimalMin("-90.0")
@@ -22,5 +22,9 @@ public record VehicleStatusUpdate(
         @PositiveOrZero
         Double speed,
         @NotNull
-        Instant timestamp)
-{ }
+        Instant eventTimestamp)
+{
+        public void withVehicleId(String vehicleId){
+                new VehicleStatusUpdate(vehicleId, this.longitude, this.latitude, this.batteryPercentage, this.speed, this.eventTimestamp);
+        }
+}

@@ -14,7 +14,8 @@ public class VehicleStatusPublisher {
         this.redisTemplate = redisTemplate;
     }
 
-    public void publishMessage(VehicleStatusUpdate update) {
+    public void publishMessage(String vehicleId, VehicleStatusUpdate update) {
+        update.withVehicleId(vehicleId);
         redisTemplate.convertAndSend("vehicle-status", update);
     }
 }

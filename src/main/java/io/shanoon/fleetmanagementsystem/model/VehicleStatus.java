@@ -14,7 +14,7 @@ import java.time.Instant;
 @Builder
 
 @Entity
-@Table(name = "VehicleStatus")
+@Table(name = "vehicle_current_status")
 public class VehicleStatus {
     private @Id @GeneratedValue(strategy = GenerationType.AUTO) String vehicleId;
     @NotNull
@@ -37,6 +37,6 @@ public class VehicleStatus {
     private Double speed;
     @NotNull
     @NotBlank
-    private Instant timestamp;
+    private Instant eventTimestamp;
 
 }
