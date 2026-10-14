@@ -10,6 +10,8 @@ import io.shanoon.fleetmanagementsystem.service.Interface.IVehicleService;
 import jakarta.transaction.Transactional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.cache.annotation.CachePut;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
@@ -37,30 +39,35 @@ public class VehicleService implements IVehicleService {
     }
 
     @Override
-    public void updateCurrentStatus(VehicleStatusUpdate update) {
-
-    }
-
-    @Override
     @Transactional
+    @CachePut(value = "vehicles", key = "#result.id")
     public void processStatusUpdate(VehicleStatusUpdate update) {
-        createVehicleHistoryFromUpdate(update);
         upsertVehicleCurrentStatusFromUpdate(update);
     }
 
 
     @Override
+    @Cacheable(value = "vehicles", key = "#vehicleId")
     public Optional<VehicleStatus> getCurrentStatus(String vehicleId) {
         return vehicleRepository.findById(vehicleId);
     }
 
     @Override
-    public List<VehicleStatusUpdate> getVehicleUpdate() {
-        return List.of();
+    @Cacheable(value = "vehicles")
+    public List<VehicleStatus> getVehicleUpdate() {
+        return vehicleRepository.findAll();
     }
 
+    @Override
+    @Cacheable(value = "vehiclesStatus")
+    public List<VehicleStatusHistory> getVehicleHistoryFromId(String vehicleId) {
+        return vehicleHistoryRepository.findAllByVehicleId(vehicleId);
+    }
 
-    private void createVehicleHistoryFromUpdate(VehicleStatusUpdate update){
+    @Override
+    @Transactional
+    @CachePut(value = "vehiclesHistory", key = "#result.id")
+    public void createVehicleHistoryFromUpdate(VehicleStatusUpdate update){
         var receivedAt = Instant.now();
         var history = new VehicleStatusHistory();
         history.setVehicleId(update.vehicleId());
